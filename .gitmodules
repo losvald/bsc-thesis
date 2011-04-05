@@ -1,0 +1,6 @@
+[submodule "slesann/src/ezlogger"]
+	path = slesann/src/ezlogger
+	url = git@github.com:losvald/EzLogger.git
+[submodule "slesann/src/matching/libhungarian"]
+	path = slesann/src/matching/libhungarian
+	url = git@github.com:losvald/libhungarian.git
