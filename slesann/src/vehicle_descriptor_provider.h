@@ -34,17 +34,19 @@
 #include "vehicle_descriptor_handler.h"
 
 #include <boost/foreach.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace slesann {
 
 template<class T>
 class VehicleDescriptorProvider {
 public:
+  typedef boost::shared_ptr< VehicleDescriptorProvider<T> > SharedPtr;
   typedef VehicleDescriptorHandler<T> VehicleDescriptorHandlerType;
-  typedef typename VehicleDescriptorHandlerType::Pointer VehicleDescriptorHandlerPointerType;
+  typedef typename VehicleDescriptorHandlerType::SharedPtr VehicleDescriptorHandlerSharedPtr;
   typedef VehicleDescriptorEvent<T> VehicleDescriptorEventType;
 
-  void AddHandler(VehicleDescriptorHandlerPointerType handler);
+  void AddHandler(VehicleDescriptorHandlerSharedPtr handler);
 
   /**
    * Grabs the next descriptor. The appropriate event will be fired,
@@ -58,19 +60,19 @@ protected:
   void NotifyDescriptorGrabbed(const VehicleDescriptorEventType& e);
 
 private:
-  std::vector<VehicleDescriptorHandlerPointerType> handlers_;
+  std::vector<VehicleDescriptorHandlerSharedPtr> handlers_;
 };
 
 
 template<class T>
 void VehicleDescriptorProvider<T>::AddHandler(
-    VehicleDescriptorHandlerPointerType handler) {
+    VehicleDescriptorHandlerSharedPtr handler) {
   handlers_.push_back(handler);
 }
 
 template<class T>
 void VehicleDescriptorProvider<T>::NotifyDescriptorGrabbed(const VehicleDescriptorEventType& e) {
-  BOOST_FOREACH(typename VehicleDescriptorHandler<T>::Pointer h, handlers_) {
+  BOOST_FOREACH(VehicleDescriptorHandlerSharedPtr h, handlers_) {
     h->HandleVehicleDescriptor(e);
   }
 }

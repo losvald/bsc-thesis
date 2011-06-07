@@ -25,9 +25,11 @@
  *      Author: losvald
  */
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
-#if 0
+#include "../src/base.h"
+
+#ifdef RUN_TESTS_ENABLED
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -25,9 +25,11 @@
  *      Author: losvald
  */
 
-#include "gtest/gtest.h"
+#include "../test.h"
 
-#include "boost/array.hpp"
+#ifndef SKIP_TESTS
+
+#include <boost/array.hpp>
 
 template<typename T, std::size_t RowCount, std::size_t ColumnCount>
 boost::array< boost::array<T, ColumnCount>, RowCount> Create2d(
@@ -43,3 +45,5 @@ TEST(boost_array, one) {
   EXPECT_EQ(2, a.at(1));
   EXPECT_EQ(3, a[2]);
 }
+
+#endif

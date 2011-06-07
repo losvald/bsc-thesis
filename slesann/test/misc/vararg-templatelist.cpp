@@ -25,6 +25,10 @@
  *      Author: losvald
  */
 
+#include "../test.h"
+
+#ifndef SKIP_TESTS
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -113,4 +117,6 @@ int main(int argc, char **argv) {
   cout << "end" << endl;
   return 0;
 }
+#endif
+
 #endif

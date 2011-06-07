@@ -25,6 +25,10 @@
  *      Author: losvald
  */
 
+#include "../test.h"
+
+#ifndef SKIP_TESTS
+
 #define EZLOGGER_IMPLEMENT_DEBUGLOGGING
 
 // include assert if DEBUG LOGGING is on (required by some functions)
@@ -190,4 +194,6 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+#endif
+
 #endif

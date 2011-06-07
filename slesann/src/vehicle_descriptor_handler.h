@@ -28,6 +28,7 @@
 #ifndef VEHICLE_DESCRIPTOR_HANDLER_H_
 #define VEHICLE_DESCRIPTOR_HANDLER_H_
 
+#include "base.h"
 #include "vehicle_descriptor_event.h"
 
 #include <boost/shared_ptr.hpp>
@@ -37,7 +38,7 @@ namespace slesann {
 template<class T>
 class VehicleDescriptorHandler {
 public:
-  typedef boost::shared_ptr<VehicleDescriptorHandler> Pointer;
+  typedef boost::shared_ptr<VehicleDescriptorHandler> SharedPtr;
 
   /**
    * Handles the descriptor representing the vehicle.

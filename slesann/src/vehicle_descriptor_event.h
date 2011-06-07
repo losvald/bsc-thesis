@@ -30,6 +30,9 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include "base.h"
+#include "util/time_utils.h"
+
 namespace slesann {
 
 template<class T>
@@ -37,13 +40,15 @@ class VehicleDescriptorEvent {
 public:
   VehicleDescriptorEvent(const T& descriptor, const boost::posix_time::ptime& timestamp);
   VehicleDescriptorEvent(const T& descriptor);
+  template<class T2>
+  friend std::ostream& operator<<(std::ostream& os, const VehicleDescriptorEvent<T2>& e);
   const T& descriptor() const;
   const boost::posix_time::ptime& timestamp() const;
 private:
   void init();
 
-  const T descriptor_;
-  const boost::posix_time::ptime& timestamp_;
+  T descriptor_;
+  boost::posix_time::ptime timestamp_;
 };
 
 template<class T>
@@ -52,7 +57,6 @@ VehicleDescriptorEvent<T>::VehicleDescriptorEvent(
     const boost::posix_time::ptime& timestamp)
     : descriptor_(descriptor),
       timestamp_(timestamp) {
-
 }
 
 template<class T>
@@ -60,6 +64,12 @@ VehicleDescriptorEvent<T>::VehicleDescriptorEvent(const T& descriptor)
 : descriptor_(descriptor),
   timestamp_(boost::posix_time::microsec_clock::local_time()) {
 
+}
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const VehicleDescriptorEvent<T>& e) {
+  os << e.descriptor_ << ' ' << PtimeToMillisecStrFromEpoch(e.timestamp_);
+  return os;
 }
 
 template<class T>

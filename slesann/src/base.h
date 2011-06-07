@@ -32,6 +32,7 @@
 #include <cstdlib>
 
 #define EZLOGGER_IMPLEMENT_DEBUGLOGGING // XXX move to Makefile / build config
+//#define RUN_TESTS_ENABLED
 
 // include assert if DEBUG LOGGING is on (required by some functions)
 #ifdef EZLOGGER_IMPLEMENT_DEBUGLOGGING
@@ -44,7 +45,7 @@ namespace slesann {
 
 namespace environment {
 
-static axter::verbosity verbosity = axter::log_verbosity_not_set; // verbosity level
+static axter::verbosity verbosity = axter::log_default_verbosity_level; // verbosity level
 
 void InitLogger();
 

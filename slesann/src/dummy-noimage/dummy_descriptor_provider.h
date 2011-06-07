@@ -32,7 +32,7 @@
 #include <ctime>
 #include <queue>
 
-#include "../dummy_base.h"
+#include "dummy_base.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/foreach.hpp>
@@ -58,14 +58,26 @@ public:
   }
 
   friend std::istream& operator>>(std::istream& is,
-                                  DummyVehicleDescriptorProvider& vip) {
+                                  DummyVehicleDescriptorProvider& vdp) {
     std::time_t t;
     DummyVehicleDescriptor descriptor;
     while (is >> descriptor >> t) {
       VehicleDescriptorEventType e(descriptor, boost::posix_time::from_time_t(t));
-      vip.events_.push(e);
+      vdp.events_.push(e);
     }
     return is;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os,
+                                  DummyVehicleDescriptorProvider& vdp) {
+    std::size_t size = vdp.events_.size();
+    for (std::size_t i = 0; i < size; ++i) {
+      VehicleDescriptorEventType e = vdp.events_.front();
+      vdp.events_.pop();
+      os << e << std::endl;
+      vdp.events_.push(e);
+    }
+    return os;
   }
 
 };

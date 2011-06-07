@@ -25,7 +25,9 @@
  *      Author: losvald
  */
 
-#include "gtest/gtest.h"
+#include "../test.h"
+
+#ifndef SKIP_TESTS
 
 #include "../../src/matching/libhungarian/hungarian.h"
 
@@ -84,3 +86,5 @@ TEST(libhungarian, random1) {
 //  int rows = 100, cols = 100;
 //  DefaultRun(RandomMatrix(rows, cols), rows, cols);
 //}
+
+#endif

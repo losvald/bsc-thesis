@@ -25,12 +25,14 @@
  *      Author: losvald
  */
 
+#include "../test.h"
+
+#ifndef SKIP_TESTS
+
 #include <cstdio>
 
-#include "gtest/gtest.h"
-#include "boost/foreach.hpp"
+#include <boost/foreach.hpp>
 
-#include "../test.h"
 #include "../../src/matching/assignment.h"
 
 using namespace slesann::matching;
@@ -63,3 +65,5 @@ TEST(assignment, convertToCost1) {
       PrintConversion(p);
   }
 }
+
+#endif

@@ -33,8 +33,10 @@
 #include "vehicle_descriptor_handler.h"
 #include "vehicle_descriptor_provider.h"
 
-#include "matching/matcher.h"
+#include "speed_limit_detector.h"
 #include "descriptor_memory.h"
+
+#include "boost/shared_ptr.hpp"
 
 namespace slesann {
 
@@ -43,20 +45,63 @@ template<class T, class TAlloc = DefaultDescriptorAllocator<T>,
 class ProcessingLoop {
 
 public:
+  typedef boost::shared_ptr< ProcessingLoop<T, TAlloc, TDealloc> > SharedPtr;
   typedef VehicleDescriptorProvider<T> VehicleDescriptorProviderType;
-  typedef SpeedLimitEnforcer<T, TAlloc, TDealloc> SpeedLimitEnforcerType;
+  typedef SpeedLimitDetector<T, TAlloc, TDealloc> SpeedLimitDetectorType;
+  typedef typename SpeedLimitDetectorType::SharedPtr
+      SpeedLimitDetectorSharedPtr;
+  typedef typename VehicleDescriptorProvider<T>::SharedPtr
+      VehicleDescriptorProviderSharedPtr;
 
-  ProcessingLoop(SpeedLimitEnforcerType* speed_limit_enforcer);
+  ProcessingLoop(SpeedLimitDetectorSharedPtr speed_limit_detector,
+                 VehicleDescriptorProviderSharedPtr desc_provider_start,
+                 VehicleDescriptorProviderSharedPtr desc_provider_end);
+
+  virtual void run();
+
+protected:
+  void init();
 
 private:
 
-  SpeedLimitEnforcerType* speed_limit_enforcer_;
+  SpeedLimitDetectorSharedPtr speed_limit_detector_;
+  VehicleDescriptorProviderSharedPtr desc_provider_start_;
+  VehicleDescriptorProviderSharedPtr desc_provider_end_;
 };
 
 template<class T, class TAlloc, class TDealloc>
 ProcessingLoop<T, TAlloc, TDealloc>::ProcessingLoop(
-    SpeedLimitEnforcerType* speed_limit_enforcer)
-    : speed_limit_enforcer_(speed_limit_enforcer) {
+    SpeedLimitDetectorSharedPtr speed_limit_detector,
+    VehicleDescriptorProviderSharedPtr desc_provider_start,
+    VehicleDescriptorProviderSharedPtr desc_provider_end)
+    : speed_limit_detector_(speed_limit_detector),
+      desc_provider_start_(desc_provider_start),
+      desc_provider_end_(desc_provider_end) {
+  init();
+}
+
+template<class T, class TAlloc, class TDealloc>
+void ProcessingLoop<T, TAlloc, TDealloc>::run() {
+  namespace pt = boost::posix_time;
+
+  while (desc_provider_start_->GrabDescriptor() ||
+      desc_provider_end_->GrabDescriptor()) {
+  }
+
+  speed_limit_detector_->DetectViolators(pt::ptime(pt::pos_infin));
+}
+
+template<class T, class TAlloc, class TDealloc>
+void ProcessingLoop<T, TAlloc, TDealloc>::init() {
+  typedef typename VehicleDescriptorProviderType::VehicleDescriptorHandlerType
+      HandlerType;
+  typedef typename VehicleDescriptorProviderType::VehicleDescriptorHandlerSharedPtr
+      HandlerSharedPtr;
+
+  HandlerSharedPtr start_handler(&speed_limit_detector_->start_checkpoint());
+  desc_provider_start_->AddHandler(start_handler);
+  HandlerSharedPtr end_handler(&speed_limit_detector_->end_checkpoint());
+   desc_provider_end_->AddHandler(end_handler);
 }
 
 }  // namespace slesann

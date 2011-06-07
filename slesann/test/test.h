@@ -28,6 +28,25 @@
 #ifndef TEST_H_
 #define TEST_H_
 
+//#define SKIP_TESTS 1
 #define VERBOSITY 1
+
+#include <gtest/gtest.h>
+
+template<class InputIterator1, class InputIterator2>
+void ExpectEq(InputIterator1 exp_begin, InputIterator2 exp_end,
+              InputIterator1 act_begin, InputIterator2 act_end) {
+  InputIterator1 exp_it = exp_begin;
+  InputIterator2 act_it = act_begin;
+  for (; ; ++exp_it, ++act_it) {
+    if (exp_it == exp_end && act_it == act_end)
+      return true;
+    if (exp_it == exp_end || act_it == act_end)
+      return false;
+    if (!(*exp_it == *act_it))
+      return false;
+  }
+  return true;
+}
 
 #endif /* TEST_H_ */

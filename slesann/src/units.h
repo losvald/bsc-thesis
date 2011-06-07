@@ -31,13 +31,22 @@
 #include <boost/units/quantity.hpp>
 #include <boost/units/systems/si/velocity.hpp>
 #include <boost/units/systems/si/length.hpp>
+#include <boost/units/systems/si/time.hpp>
+#include <boost/units/systems/si/frequency.hpp>
+#include <boost/units/systems/si/dimensionless.hpp>
 
 namespace slesann {
 
 namespace units {
 
-typedef boost::units::quantity<boost::units::si::length, double> Distance;
-typedef boost::units::quantity<boost::units::si::velocity, double> Speed;
+typedef double UnitRealType;
+
+typedef boost::units::quantity<boost::units::si::length, UnitRealType> Distance;
+typedef boost::units::quantity<boost::units::si::velocity, UnitRealType> Speed;
+typedef boost::units::quantity<boost::units::si::frequency, UnitRealType> Frequency;
+typedef boost::units::quantity<boost::units::si::time, UnitRealType> TimeDuration;
+
+const boost::units::quantity<boost::units::si::dimensionless, UnitRealType> kOne = 1.0;
 
 const Speed kmph = boost::units::si::metre_per_second / 3.6;
 

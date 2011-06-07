@@ -28,8 +28,8 @@
 #ifndef DUMMY_CHECKPOINT_H_
 #define DUMMY_CHECKPOINT_H_
 
-#include "../dummy_base.h"
 #include "../checkpoint.h"
+#include "dummy_base.h"
 
 namespace slesann {
 
