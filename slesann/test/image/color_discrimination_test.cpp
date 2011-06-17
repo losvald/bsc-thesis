@@ -149,7 +149,8 @@ void RunColorDetection(const boost::filesystem::path& file_path) {
       continue;
 
     ImagePath img_path(s);
-    cv::Mat img = Resize(ImageLoader::instance().LoadImage(img_path), 0.10);
+//    cv::Mat img = Resize(ImageLoader::instance().LoadImage(img_path), 0.10);
+    cv::Mat img = ColorDiscriminator::LoadImage(img_path);
     Hull h = FindGreatestHull(img, EmptyColorBoundaryDetector<kBgr>(img));
 
     cv::Mat img_hsv; cv::cvtColor(img, img_hsv, CV_BGR2HSV);
@@ -179,6 +180,9 @@ void RunColorDetection(const boost::filesystem::path& file_path) {
 
     cv::Vec3b bgr_avg = ColorDiscriminator::GetAverageBgrColor(img, body_pixels);
     std::cout << "RGB average: " << ToRgbString(bgr_avg) << std::endl;
+
+    cv::Vec3b hsv_avg = BgrToHsv(bgr_avg);
+    std::cout << "HSV average: " << ToHsvString(hsv_avg) << std::endl;
 
     PaintInside(img, img_hsv, h);
     cv::imshow("img", img);
@@ -229,6 +233,9 @@ void ComputeColorDiscriminationStatistics(
                                           &hue_lsf, &saturation_avg,
                                           &intensity_avg);
 
+    cv::Vec3b bgr_avg = ColorDiscriminator::GetAverageBgrColor(img, body_pixels);
+    cv::Vec3b hsv_avg = BgrToHsv(bgr_avg);
+
     if (hue_dominator.dominance() > intensity_dominator.dominance()) {
       // TODO
     }
@@ -239,6 +246,9 @@ void ComputeColorDiscriminationStatistics(
     mm_cur[kSaturationAverage].Add(saturation_avg);
     mm_cur[kIntensityAverage].Add(intensity_avg);
     mm_cur[kHueDominance].Add(hue_dominator.dominance());
+    mm_cur["avg hue"].Add(hsv_avg[0] * 2);
+    mm_cur["avg saturation"].Add(hsv_avg[1] / 2.55f);
+    mm_cur["avg intensity"].Add(hsv_avg[2] / 2.55f);
 
     PrintLastMeasurements(mm_cur);
     std::cout << std::endl;

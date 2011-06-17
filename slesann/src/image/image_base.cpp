@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <iostream>
 
+#include <opencv/cv.h>
 #include <opencv/cxcore.h>
 
 #include "../util/string_utils.h"
@@ -81,6 +82,13 @@ bool EmptyColor::IsEmpty<kHsv>(const cv::Vec3b& color) const {
 
 EmptyColor kEmptyColor;
 
+cv::Vec3b BgrToHsv(const cv::Vec3b& bgr_color) {
+  cv::Mat img_bgr(1, 1, CV_8UC3, cv::Scalar(bgr_color));
+  cv::Mat img_hsv;
+  cv::cvtColor(img_bgr, img_hsv, CV_BGR2HSV);
+  return img_hsv.at<cv::Vec3b>(0, 0);
+}
+
 std::string HueToString(uchar hue) {
   return MakeString() << std::right << std::setw(3) <<
       2 * hue << " deg";
@@ -88,7 +96,7 @@ std::string HueToString(uchar hue) {
 
 std::string SaturationToString(uchar saturation) {
   return MakeString() << std::fixed << std::setw(3) << std::setprecision(0) <<
-      100 * saturation << " %";
+      saturation / 2.55f << " %";
 }
 
 std::string IntensityToString(uchar intensity) {
@@ -103,6 +111,11 @@ std::string ToBgrString(const cv::Vec3b& px) {
 
 std::string ToRgbString(const cv::Vec3b& px) {
   return ToBgrString(cv::Vec3b(px[2], px[1], px[0]));
+}
+
+std::string ToHsvString(const cv::Vec3b& px) {
+  return MakeString() << '(' << HueToString(px[0]) << ", " <<
+        SaturationToString(px[1]) << ", " << IntensityToString(px[2]) << ')';
 }
 
 std::size_t GetPixelCount(const cv::Mat& img) {

@@ -73,6 +73,8 @@ cv::Mat CropEmptyColorFrame(cv::Mat& img) {
                                x_max - x_min + 1, y_max - y_min + 1));
 }
 
+cv::Vec3b BgrToHsv(const cv::Vec3b& bgr_color);
+
 std::string HueToString(uchar hue);
 
 std::string SaturationToString(uchar saturation);
@@ -82,6 +84,8 @@ std::string IntensityToString(uchar intensity);
 std::string ToBgrString(const cv::Vec3b& px);
 
 std::string ToRgbString(const cv::Vec3b& px);
+
+std::string ToHsvString(const cv::Vec3b& px);
 
 std::size_t GetPixelCount(const cv::Mat& img);
 

@@ -76,14 +76,14 @@ NormalizedValueImageFeature::NormalizedValueImageFeature(
 
 void NormalizedValueImageFeature::Compute(
     InputVector<float>* resized_input_vector) const {
-  (*resized_input_vector)[0] = value();
+  (*resized_input_vector)[0] = 2 * value() - 1;
 }
 
 
 GrayImageFeature::GrayImageFeature(const std::string& name,
                                    const cv::Size& size,
                                    const cv::Mat& img_gray)
-: super(name, GetPixelCount(size)) {
+: super(name, GetPixelCount(size)), img_gray_(img_gray) {
   cv::resize(img_gray, img_gray_, size);
 }
 

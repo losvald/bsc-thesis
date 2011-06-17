@@ -180,6 +180,9 @@ void ParseOptions(int argc, char **argv) {
             "sets the file to save train data used for ANN training")
         ("test-data-out", po::value<Filename>(),
             "sets the file to save test data used for ANN training")
+        ("skip-data-gen,s",
+            po::value<bool>()->default_value(false)->implicit_value(true),
+            "skips the generation o train and test data out files")
         ("shape-train", "trains shape discrimination")
         ("color-train", "trains color discrimination")
         ("plate-train", "trains plate discrimination")
@@ -394,10 +397,15 @@ void ParseOptions(int argc, char **argv) {
     //                                     train_params);
 
     if (trainer != NULL) {
-      std::cout << "Loading training data..." << std::endl;
-      ann::LoadTrainDataSet(train_data_file_path, trainer);
-      std::cout << "Loading test data..." << std::endl;
-      ann::LoadTestDataSet(test_data_file_path, trainer);
+      bool skip_gen = var_map["skip-data-gen"].as<bool>();
+      if (!skip_gen) {
+        std::cout << "Loading training data..." << std::endl;
+        ann::LoadTrainDataSet(train_data_file_path, trainer);
+        trainer->CreateTrainingFile(train_data_out_file_path);
+        std::cout << "Loading test data..." << std::endl;
+        ann::LoadTestDataSet(test_data_file_path, trainer);
+        trainer->CreateTestFile(test_data_out_file_path);
+      }
 
       std::cerr << "TrainAndTest shape matching trainer...\n" << std::endl;
       trainer->TrainAndTest(train_data_out_file_path,

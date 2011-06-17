@@ -72,6 +72,7 @@ bool Trainer::Train(const AnnData& data, const float* random_weight_limit,
     fann_init_weights(ann_, data.data());
   else
     fann_randomize_weights(ann_, -*random_weight_limit, *random_weight_limit);
+  fann_shuffle_train_data(data.data());
   fann_train_on_data(ann_, data.data(), max_epochs, epochs_between_reports,
                      desired_error);
   return GetMseAndBitFail(ann_, &mse, &bit_fail);
@@ -106,6 +107,7 @@ float Trainer::bit_fail_limit() const {
 }
 
 void Trainer::set_bit_fail_limit(float bit_fail_limit) {
+  std::cerr << "Set bit fail limit to " << bit_fail_limit << std::endl;
   fann_set_bit_fail_limit(ann_, bit_fail_limit);
 }
 
@@ -114,6 +116,7 @@ float Trainer::learning_rate() const {
 }
 
 void Trainer::set_learning_rate(float learning_rate) {
+  std::cerr << "Set learning rate to " << learning_rate << std::endl;
   fann_set_learning_rate(ann_, learning_rate);
 }
 
@@ -122,10 +125,12 @@ float Trainer::learning_momentum() const {
 }
 
 void Trainer::set_learning_momentum(float learning_momentum) {
+  std::cerr << "Set learning mementum to " << learning_momentum << std::endl;
   return fann_set_learning_momentum(ann_, learning_momentum);
 }
 
 void Trainer::set_training_algorithm(const TrainingAlgorithm& algorithm) {
+  std::cerr << "Set training algo to " << algorithm.name() << std::endl;
   fann_set_training_algorithm(ann_, algorithm.train_enum());
 }
 

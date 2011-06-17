@@ -75,6 +75,10 @@ struct ComponentLeftCornerXLess {
   }
 };
 
+int GetAdaptiveThresholdBlockSize(const cv::Mat& img) {
+  return img.rows + !(img.rows & 1);
+}
+
 }  // namespace
 
 const double PlateDiscriminator::kNormCharBeginY = 0.05;
@@ -88,6 +92,7 @@ const double PlateDiscriminator::kAdaptiveThresholdC = 47;
 const std::size_t PlateDiscriminator::kThinEdgeRemovalIterations = 2;
 
 const std::size_t PlateDiscriminator::kMaxCharactersCount = 8;
+const std::size_t PlateDiscriminator::kVerticalProjectionN = 8;
 
 float PlateDiscriminator::ComputeSimilarity(const ImagePath& d1,
                                       const ImagePath& d2) const {
@@ -108,6 +113,13 @@ cv::Mat PlateDiscriminator::LoadAsGrayscale(const ImagePath& image_path) {
   cv::Mat img_gray;
   cv::cvtColor(Resize(img, resize_factor), img_gray, CV_BGR2GRAY);
   return img_gray;
+}
+
+cv::Mat PlateDiscriminator::ApplyFilters(const cv::Mat& img_gray,
+                                         double adaptiveThresholdC) {
+//  cv::Mat img_gray;
+//  cv::cvtColor(img, img_gray, CV_BGR2GRAY);
+  return AdaptiveThresholdMean(Equalize(img_gray), adaptiveThresholdC);
 }
 
 void PlateDiscriminator::ExtractCharacters(const cv::Mat& img_binary,
@@ -141,6 +153,21 @@ PlateDiscriminator::NonCharacterRegionsRemover::CreateMap(const cv::Mat& img_bin
 int PlateDiscriminator::NonCharacterRegionsRemover::DetermineMaxBlockSize(
     const cv::Mat& img_binary, std::size_t itr) const {
   return std::max(1, img_binary.rows / 10 - 2*static_cast<int>(itr)) * 2 + 1;
+}
+
+
+cv::Mat PlateDiscriminator::Equalize(const cv::Mat& img_gray) {
+  cv::Mat eq_hist;
+  cv::equalizeHist(img_gray, eq_hist);
+  return eq_hist;
+}
+
+cv::Mat PlateDiscriminator::AdaptiveThresholdMean(const cv::Mat& img_gray, double c) {
+  cv::Mat img_thres;
+  cv::adaptiveThreshold(img_gray, img_thres, 0xFF,
+                        CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,
+                        GetAdaptiveThresholdBlockSize(img_gray), c);
+  return img_thres;
 }
 
 

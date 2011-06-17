@@ -50,8 +50,8 @@ Ann::Ann(std::size_t input_neuron_count, std::size_t output_neuron_count,
   ann_ = fann_create_standard_array(total_count, arr);
   delete[] arr;
 
-  fann_set_activation_steepness_hidden(ann_, 1);
-  fann_set_activation_steepness_output(ann_, 1);
+  fann_set_activation_steepness_hidden(ann_, 0.1);
+  fann_set_activation_steepness_output(ann_, 0.1);
 
   fann_set_activation_function_hidden(ann_, FANN_SIGMOID_SYMMETRIC);
   fann_set_activation_function_output(ann_, FANN_SIGMOID_SYMMETRIC);

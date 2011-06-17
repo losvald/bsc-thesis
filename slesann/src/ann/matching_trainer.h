@@ -185,6 +185,10 @@ public:
     output_trans_(output_data_transformer),
     params_(params) {
     set_ann(ann_.ann());
+    set_bit_fail_limit(params.bit_fail_limit());
+    set_training_algorithm(params.training_algo());
+    set_learning_rate(params.learning_rate());
+    set_learning_momentum(params.learning_momentum());
   }
 
   friend std::ostream& operator<<(std::ostream& os, const MatchingTrainer& t) {
@@ -256,7 +260,7 @@ public:
              std::size_t max_epochs, std::size_t epochs_between_reports,
              float desired_error, float* mse = NULL,
              std::size_t* bit_fail = NULL) {
-    CreateTrainingFile(train_data_out_file_path);
+//    CreateTrainingFile(train_data_out_file_path);
     BOOST_ASSERT(ann_.ann() == Trainer::ann());
     return Trainer::Train(AnnData(train_data_out_file_path),
                           random_weight_limit, max_epochs,
@@ -265,7 +269,7 @@ public:
 
   bool Test(const boost::filesystem::path& test_data_out_file_path,
             float* mse = NULL, std::size_t* bit_fail = NULL) {
-    CreateTestFile(test_data_out_file_path);
+//    CreateTestFile(test_data_out_file_path);
     return Trainer::Test(AnnData(test_data_out_file_path), mse, bit_fail);
   }
 

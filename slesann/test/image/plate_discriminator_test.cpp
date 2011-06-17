@@ -67,20 +67,6 @@ std::string GetNthCentroidName(std::size_t n, char x_or_y) {
 }
 
 
-
-int GetAdaptiveThresholdBlockSize(const cv::Mat& img) {
-  return img.rows + !(img.rows & 1);
-}
-
-cv::Mat AdaptiveThresholdMean(const cv::Mat& img_gray, double c) {
-  cv::Mat img_thres;
-  cv::adaptiveThreshold(img_gray, img_thres, 0xFF,
-                        CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,
-                        GetAdaptiveThresholdBlockSize(img_gray), c);
-  return img_thres;
-}
-
-
 cv::Mat MyRemoveThinRegions(const cv::Mat& img_binary,
                             int block_size, double c,
                             int method = CV_ADAPTIVE_THRESH_GAUSSIAN_C) {
@@ -209,20 +195,6 @@ void TestRemoveThinRegions(const cv::Mat& img_binary) {
   }
 }
 
-cv::Mat Equalize(const cv::Mat& img_gray) {
-  cv::Mat eq_hist;
-  cv::equalizeHist(img_gray, eq_hist);
-  return eq_hist;
-}
-
-cv::Mat ApplyFilters(const cv::Mat& img,
-                     double adaptiveThresholdC =
-                         PlateDiscriminator::kAdaptiveThresholdC) {
-  cv::Mat img_gray;
-  cv::cvtColor(img, img_gray, CV_BGR2GRAY);
-  return AdaptiveThresholdMean(Equalize(img_gray), adaptiveThresholdC);
-}
-
 void TestAdaptiveThresholdMean(const cv::Mat& eq_hist) {
   std::cout << "rows = " << eq_hist.rows << std::endl;
 //    int block_sizes[] = {55, 67, 81};
@@ -230,9 +202,10 @@ void TestAdaptiveThresholdMean(const cv::Mat& eq_hist) {
     std::cout << "c = " << c << std::endl;
     std::cout << "c2= " << c << std::endl;
     //BOOST_FOREACH(int block_size, block_sizes) {
-    cv::Mat img_thres = AdaptiveThresholdMean(eq_hist, c);
+    cv::Mat img_thres = PlateDiscriminator::AdaptiveThresholdMean(eq_hist, c);
     cv::imshow(MakeString() << "threshold-mean ", img_thres);
-    cv::Mat img_thres_small = AdaptiveThresholdMean(Resize(eq_hist, 0.5), c);
+    cv::Mat img_thres_small = PlateDiscriminator::AdaptiveThresholdMean(
+        Resize(eq_hist, 0.5), c);
     cv::imshow(MakeString() << "small threshold-mean ", img_thres_small);
     //}
     cv::Mat img_fixed_thres;
@@ -518,9 +491,10 @@ void ComputePlateDiscriminationStatistics(
     }
 
     ImagePath img_path(s);
-    cv::Mat img = Resize(ImageLoader::instance().LoadImage(img_path), 0.5);
+//    cv::Mat img = Resize(ImageLoader::instance().LoadImage(img_path), 0.5);
+    cv::Mat img = PlateDiscriminator::LoadAsGrayscale(img_path);
 
-    cv::Mat img_filtered = ApplyFilters(img);
+    cv::Mat img_filtered = PlateDiscriminator::ApplyFilters(img);
     cv::Mat img_filtered_trr = RemoveThinRegions(
         img_filtered, PlateDiscriminator::NonCharacterRegionsRemover(),
         PlateDiscriminator::kThinEdgeRemovalIterations);
@@ -531,10 +505,10 @@ void ComputePlateDiscriminationStatistics(
     mm_cur[kBlackWhiteRatio].Add(GetBlackWhiteRatio(img_filtered_trr));
     mm_cur[kCenterBlackWhiteRatio].Add(GetCenterBlackWhiteRatio(img_filtered_trr));
 
-    std::pair<float, float> normalized_centroid = GetNormalizedCentroids(
-        img_filtered_trr, 1)[0];
-    mm_cur[kNormCentroidX].Add(normalized_centroid.first);
-    mm_cur[kNormCentroidY].Add(normalized_centroid.second);
+//    std::pair<float, float> normalized_centroid = GetNormalizedCentroids(
+//        img_filtered_trr, 1)[0];
+//    mm_cur[kNormCentroidX].Add(normalized_centroid.first);
+//    mm_cur[kNormCentroidY].Add(normalized_centroid.second);
 
     // uniqueness square sum
      // s = sys.stdin.readlines(); sum(map(lambda x: x**2, map(float, map(lambda x: x.rstrip().split()[4], s))))
@@ -572,14 +546,14 @@ void ComputePlateDiscriminationStatistics(
 //    }
 
 
-//    for (std::size_t i = 0; i < PlateDiscriminator::kMaxCharactersCount; ++i) {
-//      float r = (i < characters.size() ? characters[i].rectangularity() : 0);
-//      mm_cur[GetCompBlackWhiteRatioName(i)].Add(r);
-//
-//      std::pair<float, float> c = (i < characters.size() ? characters[i].normalized_centroid<float>() : std::make_pair(0.f, 0.f));
-//      mm_cur[GetCompCentroidXName(i)].Add(c.first);
-//      mm_cur[GetCompCentroidYName(i)].Add(c.second);
-//    }
+    for (std::size_t i = 0; i < PlateDiscriminator::kMaxCharactersCount; ++i) {
+      float r = (i < characters.size() ? characters[i].rectangularity() : 0);
+      mm_cur[GetCompBlackWhiteRatioName(i)].Add(r);
+
+      std::pair<float, float> c = (i < characters.size() ? characters[i].normalized_centroid<float>() : std::make_pair(0.f, 0.f));
+      mm_cur[GetCompCentroidXName(i)].Add(c.first);
+      mm_cur[GetCompCentroidYName(i)].Add(c.second);
+    }
 
     std::cout << "image: " << img_path.string() << std::endl;
     PrintLastMeasurements(mm_cur);
@@ -636,10 +610,10 @@ void TestPlateFilters(const boost::filesystem::path& file_path) {
     cv::cvtColor(img, img_gray, CV_BGR2GRAY);
     cv::imshow("plate-test", img_gray);
 
-    cv::Mat eq_hist = Equalize(img_gray);
+    cv::Mat eq_hist = PlateDiscriminator::Equalize(img_gray);
     cv::imshow("eq. hist.", eq_hist);
 
-    cv::Mat img_thres = AdaptiveThresholdMean(
+    cv::Mat img_thres = PlateDiscriminator::AdaptiveThresholdMean(
         eq_hist,
         PlateDiscriminator::kAdaptiveThresholdC);
     cv::imshow("eq. hist. + adapt. thres.", img_thres);
@@ -650,6 +624,8 @@ void TestPlateFilters(const boost::filesystem::path& file_path) {
         img_thres,
         PlateDiscriminator::NonCharacterRegionsRemover(),
         PlateDiscriminator::kThinEdgeRemovalIterations);
+
+    cv::imshow("eq. hist. + adapt. thres. + trr", img_trr);
 
     std::vector<Component> characters;
     PlateDiscriminator::ExtractCharacters(img_trr, &characters);

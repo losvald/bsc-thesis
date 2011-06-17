@@ -25,7 +25,11 @@
  *      Author: losvald
  */
 
+#include "../binary_image_utils.h"
+#include "../plate_discriminator.h"
+#include "image_feature.h"
 #include "plate_input_transformer.h"
+
 
 #include <opencv/highgui.h>
 
@@ -35,19 +39,49 @@ namespace ann {
 
 namespace {
 
-InputVector<float> ComputePlateHash(const cv::Mat& img) {
-  // TODO
-}
+cv::Size kSize(150, 30);
 
 }  // namespace
 
 PlateInputTransformer::PlateInputTransformer()
-: ImageInputTransformer(0) { // FIXME
+: ImageInputTransformer(
+    3 * PlateDiscriminator::kMaxCharactersCount +
+    PlateDiscriminator::kVerticalProjectionN) { // FIXME
 }
 
 InputVector<float> PlateInputTransformer::operator()(
     const ImagePath& image_path) const {
-  return ComputePlateHash(cv::imread(image_path.string()));
+  cv::Mat img_gray = PlateDiscriminator::LoadAsGrayscale(image_path);
+  cv::Mat img_filtered = PlateDiscriminator::ApplyFilters(img_gray);
+  cv::Mat img_filtered_trr = RemoveThinRegions(
+      img_filtered, PlateDiscriminator::NonCharacterRegionsRemover(),
+      PlateDiscriminator::kThinEdgeRemovalIterations);
+
+  std::vector<Component> characters;
+  PlateDiscriminator::ExtractCharacters(img_filtered_trr, &characters);
+
+  std::vector<float> ver_bw_ratios;
+  GetVerticalBlackWhiteRatios(img_filtered_trr,
+                              PlateDiscriminator::kVerticalProjectionN,
+                              &ver_bw_ratios);
+
+  std::vector<InputVector<float> > features_ivs;
+
+  for (std::size_t i = 0; i < ver_bw_ratios.size(); ++i) {
+    features_ivs.push_back(NormalizedValueImageFeature("", ver_bw_ratios[i])());
+  }
+
+  for (std::size_t i = 0; i < PlateDiscriminator::kMaxCharactersCount; ++i) {
+    float r = (i < characters.size() ? characters[i].rectangularity() : 0);
+    features_ivs.push_back(NormalizedValueImageFeature("", r)());
+    std::pair<float, float> c = (i < characters.size() ? characters[i].normalized_centroid<float>() : std::make_pair(0.f, 0.f));
+    features_ivs.push_back(NormalizedValueImageFeature("", c.first)());
+    features_ivs.push_back(NormalizedValueImageFeature("", c.second)());
+  }
+
+  InputVector<float> iv_merged(features_ivs);
+  assert(iv_merged.size() == input_neuron_count());
+  return iv_merged;
 }
 
 }  // namespace ann

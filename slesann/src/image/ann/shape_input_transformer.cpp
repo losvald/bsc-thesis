@@ -48,8 +48,10 @@ namespace {
 ShapeInputTransformer::ShapeInputTransformer()
 : ImageInputTransformer(1 + // perimeter quotient
                         1 + // height / perimeter
-                        0
-                        ) {
+                        1 + //side_function_median
+                        1 + // height_perimeter_quotient
+                        1 + // width_perimeter_quotient
+                        0) {
 }
 
 InputVector<float> ShapeInputTransformer::operator()(
@@ -79,9 +81,17 @@ InputVector<float> ShapeInputTransformer::operator()(
       ShapeDiscriminator::GetSideFunctionMedian(body_hull)
   );
 
+  const NormalizedValueImageFeature normalized_height(
+      "",
+      ShapeDiscriminator::GetNormalizedHeight(body_hull)
+  );
+
   std::vector<InputVector<float> > features_ivs;
   features_ivs.push_back(perimeter_quotient());
   features_ivs.push_back(width_perimeter_quotient());
+  features_ivs.push_back(side_function_median());
+  features_ivs.push_back(height_perimeter_quotient());
+  features_ivs.push_back(normalized_height());
 
   // TODO
 

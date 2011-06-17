@@ -29,11 +29,14 @@
 #define PLATE_DISCRIMINATOR_H_
 
 #include "../discriminator.h"
+#include "component_utils.h"
 #include "image_base.h"
 
 #include "binary_image_utils.h"
 
 namespace slesann {
+
+//class Component;
 
 class PlateDiscriminator : public Discriminator<ImagePath> {
 
@@ -45,6 +48,7 @@ public:
   static const double kAdaptiveThresholdC;
   static const std::size_t kThinEdgeRemovalIterations;
   static const std::size_t kMaxCharactersCount;
+  static const std::size_t kVerticalProjectionN;
 
   float ComputeSimilarity(const ImagePath& d1, const ImagePath& d2) const;
   float ComputeUniqueness(const ImagePath& d,
@@ -52,9 +56,12 @@ public:
 
   static cv::Mat LoadAsGrayscale(const ImagePath& image_path);
 
+
+  static cv::Mat ApplyFilters(const cv::Mat& img,
+                              double adaptiveThresholdC = kAdaptiveThresholdC);
+
   static void ExtractCharacters(const cv::Mat& img_binary,
                                 std::vector<Component>* comps);
-
 
   class NonCharacterRegionsRemover : public ThinRegionRemover {
   public:
@@ -64,6 +71,12 @@ public:
     int DetermineMaxBlockSize(const cv::Mat& img_binary,
                               std::size_t itr) const;
   };
+
+
+  static cv::Mat AdaptiveThresholdMean(const cv::Mat& img_gray, double c);
+  static cv::Mat Equalize(const cv::Mat& img_gray);
+
+
 };
 
 }  // namespace slesann
